@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V2G聚合平台模拟器 - 车辆管理</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/cars-styles.css">
+    <script src="js/v2gCore.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="navbar-title">V2G聚合平台</div>
+        <div class="navbar-menu">
+            <a href="index.html" class="navbar-link">首页</a>
+            <a href="cars.html" class="navbar-link active">车辆管理</a>
+            <a href="v2g.html" class="navbar-link">充放电控制</a>
+            <a href="tasks.html" class="navbar-link">任务管理</a>
+            <a href="settings.html" class="navbar-link">设置</a>
+        </div>
+        <div class="navbar-icon" id="userIcon">
+            <span class="icon">👤</span>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="container">
+        <div class="page-header">
+            <h2>车辆管理</h2>
+            <button class="btn btn-primary" id="add-car-btn">添加车辆</button>
+        </div>
+
+        <!-- 车辆列表区域 -->
+        <div class="car-list-section">
+            <h3>我的车辆</h3>
+            <div id="car-list" class="car-list"></div>
+        </div>
+
+        <!-- 车辆详情区域 -->
+        <div class="car-details-section">
+            <h3>车辆详情</h3>
+            <div id="car-details" class="car-details">
+                <div class="empty-details">请选择一辆车辆查看详情</div>
+            </div>
+        </div>
+
+        <!-- 车辆统计区域 -->
+        <div class="car-stats-section">
+            <h3>车辆统计</h3>
+            <div class="stats-cards">
+                <div class="stat-card">
+                    <div class="stat-label">总车辆数</div>
+                    <div class="stat-value" id="total-cars">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">在线车辆</div>
+                    <div class="stat-value" id="online-cars">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">平均电量</div>
+                    <div class="stat-value" id="avg-battery">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总功率</div>
+                    <div class="stat-value" id="total-power">0 kW</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加车辆模态框 -->
+    <div id="add-car-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>添加新车辆</h3>
+            <form id="add-car-form">
+                <div class="form-item">
+                    <label for="car-name">车辆名称</label>
+                    <input type="text" id="car-name" name="name" required>
+                </div>
+                <div class="form-item">
+                    <label for="car-model">车辆型号</label>
+                    <input type="text" id="car-model" name="model" required>
+                </div>
+                <div class="form-item">
+                    <label for="car-battery">初始电量(%)</label>
+                    <input type="number" id="car-battery" name="battery" min="0" max="100" value="50" required>
+                </div>
+                <div class="form-item">
+                    <label for="car-status">初始状态</label>
+                    <select id="car-status" name="status">
+                        <option value="idle">闲置</option>
+                        <option value="charging">充电中</option>
+                        <option value="discharging">放电中</option>
+                        <option value="disconnected">未连接</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" id="cancel-add-car">取消</button>
+                    <button type="submit" class="btn btn-primary">添加车辆</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 引入API工具类 -->
+    <script src="utils/api.js"></script>
+    <!-- 引入公共脚本 -->
+    <script src="scripts/common.js"></script>
+    <!-- 引入页面脚本 -->
+    <script src="scripts/cars.js"></script>
+
+    <!-- 底部信息 -->
+    <div class="footer">
+        <p>V2G聚合平台模拟器 © 2024</p>
+    </div>
+</body>
+</html>

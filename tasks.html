@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V2G聚合平台模拟器 - 任务管理</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <style>
+        /* 任务管理页面样式 */
+        .tasks-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-header h2 {
+            font-size: 28px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .task-filters {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--background-color);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .filter-btn.active {
+            background-color: #1e3c72;
+            color: white;
+        }
+
+        .task-list {
+            background-color: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .task-item {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .task-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .task-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .task-status.pending {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+
+        .task-status.running {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+
+        .task-status.completed {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+
+        .task-status.cancelled {
+            background-color: #fff1f0;
+            color: #ff4d4f;
+        }
+
+        .task-info {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .task-info-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .action-btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.primary {
+            background-color: #1890ff;
+            color: white;
+        }
+
+        .action-btn.primary:hover {
+            background-color: #40a9ff;
+        }
+
+        .action-btn.danger {
+            background-color: #ff4d4f;
+            color: white;
+        }
+
+        .action-btn.danger:hover {
+            background-color: #ff7875;
+        }
+
+        .action-btn.secondary {
+            background-color: #f0f0f0;
+            color: var(--text-primary);
+        }
+
+        .action-btn.secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* 添加任务按钮 */
+        .add-task-btn {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .add-task-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(30, 60, 114, 0.4);
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            margin: 5% auto;
+            padding: 32px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+        }
+
+        .form-item {
+            margin-bottom: 24px;
+        }
+
+        .form-item label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-item input,
+        .form-item select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-item input:focus,
+        .form-item select:focus {
+            outline: none;
+            border-color: #1890ff;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .task-filters {
+                flex-wrap: wrap;
+            }
+
+            .task-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .task-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="navbar-title">V2G聚合平台</div>
+        <div class="navbar-menu">
+            <a href="index.html" class="navbar-link">首页</a>
+            <a href="cars.html" class="navbar-link">车辆管理</a>
+            <a href="v2g.html" class="navbar-link">充放电控制</a>
+            <a href="tasks.html" class="navbar-link active">任务管理</a>
+            <a href="settings.html" class="navbar-link">设置</a>
+        </div>
+        <div class="navbar-icon" id="userIcon">
+            <span class="icon">👤</span>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="tasks-container">
+        <div class="page-header">
+            <h2>任务管理</h2>
+            <button class="add-task-btn" onclick="openAddTaskModal()">
+                <span>➕</span> 添加任务
+            </button>
+        </div>
+
+        <!-- 任务筛选 -->
+        <div class="task-filters">
+            <button class="filter-btn active" data-status="all">全部任务</button>
+            <button class="filter-btn" data-status="pending">待执行</button>
+            <button class="filter-btn" data-status="running">执行中</button>
+            <button class="filter-btn" data-status="completed">已完成</button>
+            <button class="filter-btn" data-status="cancelled">已取消</button>
+        </div>
+
+        <!-- 任务列表 -->
+        <div class="task-list" id="task-list">
+            <!-- 任务项将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 添加任务模态框 -->
+    <div id="add-task-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>添加新任务</h3>
+            <form id="add-task-form">
+                <div class="form-item">
+                    <label for="task-title">任务名称</label>
+                    <input type="text" id="task-title" name="title" required>
+                </div>
+                <div class="form-item">
+                    <label for="task-type">任务类型</label>
+                    <select id="task-type" name="type" required>
+                        <option value="charge">充电</option>
+                        <option value="discharge">放电</option>
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label for="task-car">选择车辆</label>
+                    <select id="task-car" name="carId" required>
+                        <!-- 车辆选项将通过JavaScript动态生成 -->
+                    </select>
+                </div>
+                <div class="form-item">
+                    <label for="task-time">执行时间</label>
+                    <input type="datetime-local" id="task-time" name="scheduledTime" required>
+                </div>
+                <div class="form-item">
+                    <label for="task-power">功率 (kW)</label>
+                    <input type="number" id="task-power" name="power" min="0" step="0.1" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">添加任务</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 引入JavaScript文件 -->
+    <script src="scripts/common.js"></script>
+    <script src="utils/taskManager.js"></script>
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initPage();
+        });
+
+        // 初始化页面
+        function initPage() {
+            loadTasks();
+            loadCarsForSelect();
+            initEventListeners();
+        }
+
+        // 加载任务列表
+        function loadTasks(status = 'all') {
+            const tasks = status === 'all' ? 
+                taskManager.getTasks() : 
+                taskManager.getTasksByStatus(status);
+            renderTaskList(tasks);
+        }
+
+        // 渲染任务列表
+        function renderTaskList(tasks) {
+            const taskList = document.getElementById('task-list');
+            if (!taskList) return;
+
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary); font-size: 16px;">暂无任务</div>';
+                return;
+            }
+
+            taskList.innerHTML = tasks.map(task => `
+                <div class="task-item">
+                    <div class="task-header">
+                        <div>
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-status ${task.status}">${getStatusText(task.status)}</div>
+                        </div>
+                    </div>
+                    <div class="task-info">
+                        <div class="task-info-item">
+                            <span>📅</span>
+                            <span>${formatDateTime(new Date(task.scheduledTime))}</span>
+                        </div>
+                        <div class="task-info-item">
+                            <span>🚗</span>
+                            <span>${task.carName || '未知车辆'}</span>
+                        </div>
+                        <div class="task-info-item">
+                            <span>⚡</span>
+                            <span>${task.power} kW</span>
+                        </div>
+                        <div class="task-info-item">
+                            <span>🔋</span>
+                            <span>${task.startSOC}% → ${task.endSOC}%</span>
+                        </div>
+                    </div>
+                    <div class="task-actions">
+                        ${task.status === 'pending' ? `
+                            <button class="action-btn primary" onclick="startTask(${task.id})">启动</button>
+                            <button class="action-btn danger" onclick="cancelTask(${task.id})">取消</button>
+                        ` : ''}
+                        ${task.status === 'running' ? `
+                            <button class="action-btn danger" onclick="stopTask(${task.id})">停止</button>
+                        ` : ''}
+                        <button class="action-btn secondary" onclick="deleteTask(${task.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                pending: '待执行',
+                running: '执行中',
+                completed: '已完成',
+                cancelled: '已取消'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 加载车辆列表用于选择
+        function loadCarsForSelect() {
+            const cars = getAppData().cars || [];
+            const selectElement = document.getElementById('task-car');
+            if (!selectElement) return;
+
+            selectElement.innerHTML = cars.map(car => 
+                `<option value="${car.id}">${car.name} (${car.model})</option>`
+            ).join('');
+        }
+
+        // 打开添加任务模态框
+        function openAddTaskModal() {
+            document.getElementById('add-task-modal').style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('add-task-modal').style.display = 'none';
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 筛选按钮事件
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const status = e.target.dataset.status;
+                    loadTasks(status);
+                });
+            });
+
+            // 添加任务表单提交
+            document.getElementById('add-task-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addTask();
+            });
+
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    closeModal();
+                }
+            });
+        }
+
+        // 添加任务
+        function addTask() {
+            const formData = new FormData(document.getElementById('add-task-form'));
+            const taskData = {
+                title: formData.get('title'),
+                type: formData.get('type'),
+                carId: parseInt(formData.get('carId')),
+                scheduledTime: new Date(formData.get('scheduledTime')),
+                power: parseFloat(formData.get('power')),
+                startSOC: 50,
+                endSOC: 80
+            };
+
+            // 获取选中车辆信息
+            const cars = getAppData().cars || [];
+            const selectedCar = cars.find(car => car.id === taskData.carId);
+            if (selectedCar) {
+                taskData.carName = selectedCar.name;
+                taskData.startSOC = selectedCar.batteryLevel;
+            }
+
+            // 添加任务
+            taskManager.addTask(taskData);
+            showNotification('任务添加成功！', 'success');
+            loadTasks();
+            closeModal();
+
+            // 重置表单
+            document.getElementById('add-task-form').reset();
+        }
+
+        // 启动任务
+        function startTask(taskId) {
+            taskManager.startTask(taskId);
+            showNotification('任务已启动！', 'success');
+            loadTasks();
+        }
+
+        // 停止任务
+        function stopTask(taskId) {
+            taskManager.stopTask(taskId);
+            showNotification('任务已停止！', 'info');
+            loadTasks();
+        }
+
+        // 取消任务
+        function cancelTask(taskId) {
+            taskManager.cancelTask(taskId);
+            showNotification('任务已取消！', 'warning');
+            loadTasks();
+        }
+
+        // 删除任务
+        function deleteTask(taskId) {
+            taskManager.deleteTask(taskId);
+            showNotification('任务已删除！', 'success');
+            loadTasks();
+        }
+    </script>
+</body>
+</html>

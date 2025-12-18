@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: v2g-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=${SECRET_KEY:-v2g-platform-secret-key}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-v2g-jwt-secret-key}
+      - DATABASE_URL=sqlite:///v2g.db
+    volumes:
+      - ./backend/v2g.db:/app/v2g.db
+      - ./backend/uploads:/app/uploads
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: v2g-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

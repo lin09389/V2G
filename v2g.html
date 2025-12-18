@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>V2G聚合平台模拟器 - 充放电控制</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/v2g-styles.css">
+    <script src="js/v2gCore.js"></script>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="navbar">
+        <div class="navbar-title">V2G聚合平台</div>
+        <div class="navbar-menu">
+            <a href="index.html" class="navbar-link">首页</a>
+            <a href="cars.html" class="navbar-link">车辆管理</a>
+            <a href="v2g.html" class="navbar-link active">充放电控制</a>
+            <a href="tasks.html" class="navbar-link">任务管理</a>
+            <a href="settings.html" class="navbar-link">设置</a>
+        </div>
+        <div class="navbar-icon" id="userIcon">
+            <span class="icon">👤</span>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="container">
+        <div class="page-header">
+            <h2>V2G充放电控制</h2>
+        </div>
+
+        <!-- 车辆选择区域 -->
+        <div class="vehicle-select-section">
+            <h3>选择车辆</h3>
+            <div class="vehicle-selector">
+                <select id="vehicle-select" class="vehicle-select">
+                    <option value="">请选择车辆</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- V2G状态区域 -->
+        <div class="v2g-status-section">
+            <h3>V2G连接状态</h3>
+            <div class="status-card">
+                <div class="status-item">
+                    <div class="status-label">连接状态</div>
+                    <div class="status-value" id="connection-status">未连接</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">充放电模式</div>
+                    <div class="status-value" id="v2g-mode">未设置</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">当前功率</div>
+                    <div class="status-value" id="current-power">0 kW</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">累计能量</div>
+                    <div class="status-value" id="total-energy">0 kWh</div>
+                </div>
+            </div>
+            <div class="connection-actions">
+                <button class="btn btn-primary" id="connect-btn">连接V2G</button>
+            </div>
+        </div>
+
+        <!-- 控制面板 -->
+        <div class="control-panel-section">
+            <h3>充放电控制</h3>
+            <div class="control-tabs">
+                <button class="tab-btn active" data-tab="charge">充电模式</button>
+                <button class="tab-btn" data-tab="discharge">放电模式</button>
+            </div>
+            
+            <!-- 充电模式面板 -->
+            <div class="control-panel active" id="charge-panel">
+                <div class="control-group">
+                    <label for="charge-power">充电功率 (kW)</label>
+                    <input type="range" id="charge-power" min="0" max="50" value="15" step="1">
+                    <div class="range-value" id="charge-power-value">15 kW</div>
+                </div>
+                <div class="control-group">
+                    <label for="target-soc">目标电量 (%)</label>
+                    <input type="range" id="target-soc" min="0" max="100" value="80" step="5">
+                    <div class="range-value" id="target-soc-value">80%</div>
+                </div>
+                <div class="control-actions">
+                    <button class="btn btn-primary" id="start-charge-btn">开始充电</button>
+                    <button class="btn btn-cancel" id="stop-charge-btn">停止充电</button>
+                </div>
+            </div>
+            
+            <!-- 放电模式面板 -->
+            <div class="control-panel" id="discharge-panel">
+                <div class="control-group">
+                    <label for="discharge-power">放电功率 (kW)</label>
+                    <input type="range" id="discharge-power" min="0" max="50" value="20" step="1">
+                    <div class="range-value" id="discharge-power-value">20 kW</div>
+                </div>
+                <div class="control-group">
+                    <label for="min-soc">最低保留电量 (%)</label>
+                    <input type="range" id="min-soc" min="0" max="100" value="20" step="5">
+                    <div class="range-value" id="min-soc-value">20%</div>
+                </div>
+                <div class="control-actions">
+                    <button class="btn btn-primary" id="start-discharge-btn">开始放电</button>
+                    <button class="btn btn-cancel" id="stop-discharge-btn">停止放电</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实时数据区域 -->
+        <div class="realtime-data-section">
+            <h3>实时数据监控</h3>
+            <div class="data-grid">
+                <div class="data-item">
+                    <div class="data-label">电池电量</div>
+                    <div class="data-value" id="battery-level">0%</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">电压</div>
+                    <div class="data-value" id="voltage">0 V</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">电流</div>
+                    <div class="data-value" id="current">0 A</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">温度</div>
+                    <div class="data-value" id="temperature">0 °C</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">电网频率</div>
+                    <div class="data-value" id="grid-frequency">50.0 Hz</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label">电网电压</div>
+                    <div class="data-value" id="grid-voltage">220 V</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 能量图表区域 -->
+        <div class="energy-chart-section">
+            <h3>能量流动图表</h3>
+            <div class="chart-container">
+                <div id="power-chart" class="power-chart">
+                    <!-- 这里可以使用Canvas或图表库绘制能量流动图表 -->
+                    <div class="chart-placeholder">
+                        <div class="chart-title">实时功率变化</div>
+                        <div class="chart-simulation">
+                            <!-- 模拟图表线条 -->
+                            <svg width="100%" height="200">
+                                <line x1="0" y1="100" x2="100%" y2="100" stroke="#e0e0e0" stroke-width="2" />
+                                <path d="M0,100 L50,80 L100,120 L150,60 L200,140 L250,70 L300,110 L350,90 L400,130 L450,80 L500,120 L550,100" 
+                                      stroke="#00a854" stroke-width="3" fill="none" />
+                                <path d="M0,100 L50,80 L100,120 L150,60 L200,140 L250,70 L300,110 L350,90 L400,130 L450,80 L500,120 L550,100 L550,200 L0,200 Z" 
+                                      fill="rgba(0, 168, 84, 0.1)" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入API工具类 -->
+    <script src="utils/api.js"></script>
+    <!-- 引入公共脚本 -->
+    <script src="scripts/common.js"></script>
+    <!-- 引入页面脚本 -->
+    <script src="scripts/v2g.js"></script>
+
+    <!-- 底部信息 -->
+    <div class="footer">
+        <p>V2G聚合平台模拟器 © 2024</p>
+    </div>
+</body>
+</html>
